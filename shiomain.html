@@ -78,7 +78,7 @@
     <div id="section-shio-main" class="hidden section-fade">
       <header class="mb-10">
         <h1 class="text-4xl font-black text-slate-800 tracking-tight">📊 Shio Main Analysis</h1>
-        <p class="text-slate-500 mt-1 italic">Data analisis shio main harian terupdate (Wrap Text Enabled)</p>
+        <p class="text-slate-500 mt-1 italic">Data analisis shio main harian terupdate (Optimized Wrap Text)</p>
       </header>
       <div id="shio-main-loading" class="flex flex-col items-center justify-center py-32 text-slate-400">
         <div class="animate-spin mb-6 text-indigo-600"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>
@@ -90,7 +90,7 @@
   </main>
 
   <script>
-    // --- LOGIKA EKOR (STATIS) ---
+    // --- DATA EKOR ---
     const dataEkor = {
       0: { bom: "30*31*37*38*50*51*57*58*90*91*97*98", top: "20*21*27*28*60*61*67*68*40*41*47*48", cadangan: "32*36*34*52*56*54*92*96*94" },
       1: { bom: "31*32*35*38*91*92*95*98*71*72*75*78", top: "01*02*05*08*41*42*45*48*61*62*65*68", cadangan: "30*34*36*90*94*96*70*74*76" },
@@ -143,7 +143,7 @@
         renderShio(listShio);
         document.getElementById('shio-loading').classList.add('hidden');
       } catch (error) {
-        document.getElementById('shio-loading').innerHTML = `<p class="text-red-500 font-bold">Error Memuat Database Shio!</p>`;
+        document.getElementById('shio-loading').innerHTML = `<p class="text-red-500 font-bold">Error!</p>`;
       }
     }
 
@@ -187,7 +187,7 @@
       renderShio(listShio, query);
     }
 
-    // --- LOGIKA SHIO MAIN (CSV BARU & WRAP TEXT) ---
+    // --- LOGIKA SHIO MAIN (CSV & SPECIAL WRAP TEXT) ---
     const csvShioMainUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=12164954&single=true&output=csv';
     let listShioMain = [];
     let headersShioMain = [];
@@ -207,7 +207,7 @@
         renderShioMain(listShioMain);
         document.getElementById('shio-main-loading').classList.add('hidden');
       } catch (error) {
-        document.getElementById('shio-main-loading').innerHTML = `<p class="text-red-500 font-bold">Gagal memuat data SHIO MAIN!</p>`;
+        document.getElementById('shio-main-loading').innerHTML = `<p class="text-red-500 font-bold">Gagal!</p>`;
       }
     }
 
@@ -220,11 +220,17 @@
         
         let contents = '';
         for(let i = 0; i < headersShioMain.length; i++) {
-          if(headersShioMain[i]) {
+          const headerName = headersShioMain[i];
+          if(headerName) {
+            // Cek apakah header adalah 2D BOM atau 2D TOP
+            const isSpecialRow = headerName.toUpperCase().includes("2D BOM") || headerName.toUpperCase().includes("2D TOP");
+            
             contents += `
-              <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start py-3 border-b border-slate-50 gap-2">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tight shrink-0 mt-0.5">${headersShioMain[i]}</span>
-                <span class="text-sm font-extrabold text-indigo-700 break-words leading-relaxed sm:text-right">
+              <div class="flex ${isSpecialRow ? 'flex-col' : 'flex-col sm:flex-row sm:justify-between sm:items-start'} py-3 border-b border-slate-50 gap-2">
+                <span class="text-[10px] font-bold ${isSpecialRow ? 'text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md w-fit' : 'text-slate-400'} uppercase tracking-tight shrink-0">
+                  ${headerName}
+                </span>
+                <span class="text-sm font-extrabold text-indigo-700 break-words leading-relaxed ${!isSpecialRow ? 'sm:text-right' : 'bg-slate-50 p-2 rounded-xl border border-dashed border-slate-200'}">
                   ${item[i] || '-'}
                 </span>
               </div>`;
@@ -235,7 +241,7 @@
       });
     }
 
-    // --- NAVIGASI DASAR ---
+    // --- NAVIGASI ---
     function toggle(id) {
       const el = document.getElementById(id);
       const icon = document.getElementById("icon-" + id);
