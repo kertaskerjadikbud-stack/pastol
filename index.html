@@ -17,7 +17,6 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #f1f1f1; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    .highlight-match { background-color: #fef08a; color: #1e40af; padding: 2px 4px; border-radius: 4px; font-weight: 800; border: 1px dashed #eab308; }
   </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex">
@@ -114,7 +113,12 @@
   </main>
 
   <script>
-    // --- DATA EKOR ---
+    // --- URLs ---
+    const csvShioUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=228702435&single=true&output=csv';
+    const csvShioMainUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=12164954&single=true&output=csv';
+    const csvInputMainUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=1633987050&single=true&output=csv';
+
+    // --- DATA EKOR STATIC ---
     const dataEkor = {
       0: { bom: "30*31*37*38*50*51*57*58*90*91*97*98", top: "20*21*27*28*60*61*67*68*40*41*47*48", cadangan: "32*36*34*52*56*54*92*96*94" },
       1: { bom: "31*32*35*38*91*92*95*98*71*72*75*78", top: "01*02*05*08*41*42*45*48*61*62*65*68", cadangan: "30*34*36*90*94*96*70*74*76" },
@@ -128,6 +132,39 @@
       9: { bom: "31*32*36*39*51*52*56*59*71*72*76*79", top: "01*02*06*09*41*42*46*49*81*82*86*89", cadangan: "30*34*38*50*54*58*70*74*78" }
     };
 
+    // --- DATA STATE ---
+    let listShio = []; let headersShio = [];
+    let listShioMain = []; let headersShioMain = [];
+    let listInputMain = [];
+
+    // --- UTILITIES ---
+    async function fetchCSV(url) {
+      try {
+        const response = await fetch(url);
+        const csvText = await response.text();
+        const rows = csvText.replace(/\r/g, "").split('\n').filter(row => row.trim() !== "");
+        const headers = rows[0].split(',').map(h => h.replace(/"/g, '').trim());
+        const data = rows.slice(1).map(row => {
+          const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+          return cols.map(c => c.replace(/"/g, '').trim());
+        });
+        return { headers, data };
+      } catch (e) { console.error("Error fetching CSV:", e); return { headers: [], data: [] }; }
+    }
+
+    function highlightDigits(text, digits) {
+      if (!digits.length) return text;
+      let result = text;
+      digits.forEach(d => {
+        const regex = new RegExp(d, "g");
+        result = result.replace(regex, `<span class="text-red-600 underline">${d}</span>`);
+      });
+      return result;
+    }
+
+    // --- RENDER FUNCTIONS ---
+
+    // 1. Render Ekor
     const ekorContainer = document.getElementById("ekor-container");
     Object.entries(dataEkor).forEach(([ekor, { bom, top, cadangan }]) => {
       const block = document.createElement("div");
@@ -147,137 +184,25 @@
       ekorContainer.appendChild(block);
     });
 
-    // --- LOGIKA DATA CSV (SHARED) ---
-    async function fetchCSV(url) {
-      const response = await fetch(url);
-      const csvText = await response.text();
-      const cleanText = csvText.replace(/\r/g, "");
-      const rows = cleanText.split('\n').filter(row => row.trim() !== "");
-      const headers = rows[0].split(',').map(h => h.replace(/"/g, '').trim());
-      const data = rows.slice(1).map(row => {
-        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-        return cols.map(c => c.replace(/"/g, '').trim());
-      });
-      return { headers, data };
-    }
-
-    // Database Shio & Shio Main Logic (Existing)
-    let listShio = []; let headersShio = [];
-    async function fetchShioData() {
-      if (listShio.length > 0) return;
-      const res = await fetchCSV(csvShioUrl);
-      headersShio = res.headers; listShio = res.data;
-      renderShio(listShio);
-      document.getElementById('shio-loading').classList.add('hidden');
-    }
-
-    // --- LOGIKA MENU INPUT ANGKA MAIN ---
-    const csvInputMainUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=1633987050&single=true&output=csv';
-    let listInputMain = [];
-
-    async function fetchInputMainData() {
-      if (listInputMain.length > 0) return;
-      try {
-        const res = await fetchCSV(csvInputMainUrl);
-        listInputMain = res.data;
-        renderInputMain(listInputMain);
-        document.getElementById('input-main-loading').classList.add('hidden');
-      } catch (e) { console.error(e); }
-    }
-
-    function renderInputMain(data, mainDigits = []) {
-      const container = document.getElementById('input-main-container');
-      container.innerHTML = '';
-      
-      // Filter Logic: Patokan Kolom C (Indeks 2)
-      // Jika diinput '24', maka digit '2' atau '4' harus ada di Kolom C
-      const filtered = data.filter(row => {
-        if (mainDigits.length === 0) return true; // Tampilkan semua jika kosong
-        const colC = row[2] || "";
-        return mainDigits.some(digit => colC.includes(digit));
-      });
-
-      if (filtered.length === 0) {
-        container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">Tidak ada data yang cocok dengan Angka Main tersebut.</div>`;
-        return;
-      }
-
-      filtered.forEach(row => {
-        // Kolom D (Indeks 3), C (Indeks 2), A (Indeks 0)
+    // 2. Render Database Shio
+    function renderShio(data) {
+      const shioContainer = document.getElementById('shio-container');
+      shioContainer.innerHTML = '';
+      data.forEach(item => {
+        const shioName = item[0] || "Unknown";
+        const filteredCols = [];
+        for(let i = 13; i < headersShio.length; i++) { if(headersShio[i] && i <= 32) filteredCols.push({ label: headersShio[i], value: item[i] || '-' }); }
         const card = document.createElement('div');
-        card.className = "bg-white border border-slate-200 rounded-2xl p-5 shadow-sm animate-fadeIn card-hover";
-        card.innerHTML = `
-          <div class="flex flex-col gap-3">
-            <div class="border-b pb-2">
-              <span class="text-[9px] font-bold text-slate-400 uppercase block tracking-widest">RESULT / DATA</span>
-              <span class="text-lg font-black text-blue-600">${row[3] || '-'}</span>
-            </div>
-            <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
-              <span class="text-[9px] font-bold text-indigo-400 uppercase block tracking-widest">KAPALA/EKOR (C)</span>
-              <span class="text-xl font-black text-indigo-700 tracking-tighter">
-                ${highlightDigits(row[2] || '-', mainDigits)}
-              </span>
-            </div>
-            <div>
-              <span class="text-[9px] font-bold text-slate-400 uppercase block tracking-widest">KETERANGAN (A)</span>
-              <span class="text-sm font-medium text-slate-600">${row[0] || '-'}</span>
-            </div>
-          </div>
-        `;
-        container.appendChild(card);
+        card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm card-hover transition-custom animate-fadeIn overflow-hidden";
+        card.innerHTML = `<div class="bg-slate-800 p-5 flex justify-between items-center text-white"><h3 class="text-2xl font-black uppercase tracking-tight">${shioName}</h3></div>
+          <div class="p-6"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            ${filteredCols.map(col => `<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col"><span class="text-[10px] font-bold text-slate-400 uppercase mb-2 border-b pb-1">${col.label}</span><span class="text-sm font-black text-slate-700 break-all leading-relaxed">${col.value}</span></div>`).join('')}
+          </div></div>`;
+        shioContainer.appendChild(card);
       });
     }
 
-    function highlightDigits(text, digits) {
-      if (!digits.length) return text;
-      let result = text;
-      digits.forEach(d => {
-        const regex = new RegExp(d, "g");
-        result = result.replace(regex, `<span class="text-red-600 underline">${d}</span>`);
-      });
-      return result;
-    }
-
-    function filterAngkaMain() {
-      const val = document.getElementById('angka-main-input').value.trim();
-      const digits = val.split('').filter(d => !isNaN(d) && d !== ' ');
-      renderInputMain(listInputMain, digits);
-    }
-
-    // --- NAVIGASI DASAR ---
-    function toggle(id) {
-      const el = document.getElementById(id);
-      const icon = document.getElementById("icon-" + id);
-      el.classList.toggle("hidden");
-      if(icon) icon.style.transform = el.classList.contains("hidden") ? "rotate(0deg)" : "rotate(180deg)";
-    }
-
-    function showSection(section, btn) {
-      document.querySelectorAll('.section-fade').forEach(s => s.classList.add("hidden"));
-      const target = document.getElementById(`section-${section}`);
-      if(target) target.classList.remove("hidden");
-      
-      document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove("active-menu"));
-      btn.classList.add("active-menu");
-      
-      if (section === 'shio') fetchShioData();
-      if (section === 'shio-main') fetchShioMainData();
-      if (section === 'input-main') fetchInputMainData();
-    }
-
-    // Existing Logic (Database Shio & Shio Main)
-    const csvShioUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=228702435&single=true&output=csv';
-    const csvShioMainUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=12164954&single=true&output=csv';
-    
-    // ... (Keep existing fetchShioMainData and render logic from previous code) ...
-    async function fetchShioMainData() {
-      if (headersShioMain.length > 0) return;
-      const res = await fetchCSV(csvShioMainUrl);
-      headersShioMain = res.headers; listShioMain = res.data;
-      renderShioMain(listShioMain);
-      document.getElementById('shio-main-loading').classList.add('hidden');
-    }
-    let headersShioMain = []; let listShioMain = [];
+    // 3. Render Shio Main
     function renderShioMain(data) {
       const container = document.getElementById('shio-main-container');
       container.innerHTML = '';
@@ -299,21 +224,100 @@
         container.appendChild(card);
       });
     }
-    function renderShio(data, searchTerm = "") {
-      const shioContainer = document.getElementById('shio-container');
-      shioContainer.innerHTML = '';
-      data.forEach(item => {
-        const shioName = item[0] || "Unknown";
-        const filteredCols = [];
-        for(let i = 13; i < headersShio.length; i++) { if(headersShio[i] && i <= 32) filteredCols.push({ label: headersShio[i], value: item[i] || '-' }); }
-        const card = document.createElement('div');
-        card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm card-hover transition-custom animate-fadeIn overflow-hidden";
-        card.innerHTML = `<div class="bg-slate-800 p-5 flex justify-between items-center text-white"><h3 class="text-2xl font-black uppercase tracking-tight">${shioName}</h3></div>
-          <div class="p-6"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            ${filteredCols.map(col => `<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col"><span class="text-[10px] font-bold text-slate-400 uppercase mb-2 border-b pb-1">${col.label}</span><span class="text-sm font-black text-slate-700 break-all leading-relaxed">${col.value}</span></div>`).join('')}
-          </div></div>`;
-        shioContainer.appendChild(card);
+
+    // 4. Render Input Angka Main (With UPDATED WRAP TEXT)
+    function renderInputMain(data, mainDigits = []) {
+      const container = document.getElementById('input-main-container');
+      container.innerHTML = '';
+      
+      const filtered = data.filter(row => {
+        if (mainDigits.length === 0) return true; 
+        const colC = row[2] || "";
+        return mainDigits.some(digit => colC.includes(digit));
       });
+
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">Tidak ada data yang cocok.</div>`;
+        return;
+      }
+
+      filtered.forEach(row => {
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-200 rounded-2xl p-5 shadow-sm animate-fadeIn card-hover flex flex-col h-full";
+        card.innerHTML = `
+          <div class="flex flex-col gap-3 h-full">
+            <div class="border-b pb-2">
+              <span class="text-[9px] font-bold text-slate-400 uppercase block tracking-widest">RESULT / DATA</span>
+              <span class="text-lg font-black text-blue-600">${row[3] || '-'}</span>
+            </div>
+            <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+              <span class="text-[9px] font-bold text-indigo-400 uppercase block tracking-widest">KEPALA/EKOR (C)</span>
+              <span class="text-xl font-black text-indigo-700 tracking-tighter">
+                ${highlightDigits(row[2] || '-', mainDigits)}
+              </span>
+            </div>
+            <div class="mt-auto pt-2">
+              <span class="text-[9px] font-bold text-slate-400 uppercase block tracking-widest mb-1">KETERANGAN (A)</span>
+              <div class="text-sm font-semibold text-slate-600 leading-relaxed whitespace-pre-wrap break-words italic bg-slate-50/50 p-2 rounded-lg border border-slate-100">
+                ${row[0] || '-'}
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // --- FETCH LOGIC ---
+    async function fetchShioData() {
+      if (listShio.length > 0) return;
+      const res = await fetchCSV(csvShioUrl);
+      headersShio = res.headers; listShio = res.data;
+      renderShio(listShio);
+      document.getElementById('shio-loading').classList.add('hidden');
+    }
+
+    async function fetchShioMainData() {
+      if (headersShioMain.length > 0) return;
+      const res = await fetchCSV(csvShioMainUrl);
+      headersShioMain = res.headers; listShioMain = res.data;
+      renderShioMain(listShioMain);
+      document.getElementById('shio-main-loading').classList.add('hidden');
+    }
+
+    async function fetchInputMainData() {
+      if (listInputMain.length > 0) return;
+      const res = await fetchCSV(csvInputMainUrl);
+      listInputMain = res.data;
+      renderInputMain(listInputMain);
+      document.getElementById('input-main-loading').classList.add('hidden');
+    }
+
+    // --- HANDLERS ---
+    function filterAngkaMain() {
+      const val = document.getElementById('angka-main-input').value.trim();
+      const digits = val.split('').filter(d => !isNaN(d) && d !== ' ');
+      renderInputMain(listInputMain, digits);
+    }
+
+    function toggle(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById("icon-" + id);
+      el.classList.toggle("hidden");
+      if(icon) icon.style.transform = el.classList.contains("hidden") ? "rotate(0deg)" : "rotate(180deg)";
+    }
+
+    function showSection(section, btn) {
+      document.querySelectorAll('.section-fade').forEach(s => s.classList.add("hidden"));
+      const target = document.getElementById(`section-${section}`);
+      if(target) target.classList.remove("hidden");
+      
+      document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove("active-menu"));
+      btn.classList.add("active-menu");
+      
+      if (section === 'shio') fetchShioData();
+      if (section === 'shio-main') fetchShioMainData();
+      if (section === 'input-main') fetchInputMainData();
     }
   </script>
 </body>
