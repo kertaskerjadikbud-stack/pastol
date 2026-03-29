@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>2D Premium Dashboard - Filtered Live Analysis</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .glass-effect { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+    .active-menu { background: #1d4ed8 !important; color: white !important; box-shadow: 0 4px 12px rgba(29, 78, 216, 0.3); }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0,0,0,0.07); }
+    .transition-custom { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #f1f1f1; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    /* Warna sorotan lebih kontras untuk angka yang dicari */
+    .highlight-match { background-color: #fef08a; color: #1e40af; padding: 2px 4px; border-radius: 4px; font-weight: 800; border: 1px dashed #eab308; }
+  </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex">
+
+  <aside class="w-72 glass-effect border-r border-slate-200 p-6 flex flex-col fixed h-full z-10">
+    <div class="flex items-center gap-3 mb-10 px-2">
+      <div class="bg-blue-600 p-2 rounded-lg text-white shadow-lg shadow-blue-200">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+      </div>
+      <h2 class="text-xl font-extrabold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">Analisis 2D</h2>
+    </div>
+    
+    <nav class="space-y-2 flex-1">
+      <button onclick="showSection('ekor', this)" class="menu-btn active-menu w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-semibold transition-custom text-left">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20"/><path d="m17 17-5 5-5-5"/><path d="m7 7 5-5 5 5"/></svg>
+        2D EKOR
+      </button>
+      <button onclick="showSection('shio', this)" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-semibold transition-custom text-left">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-1.2 0-2.4.6-3 1.7A3.6 3.6 0 0 0 4.3 9c-1.1.6-1.7 1.8-1.7 3s.6 2.4 1.7 3A3.6 3.6 0 0 0 9 19.3c.6 1.1 1.8 1.7 3 1.7s2.4-.6 3-1.7a3.6 3.6 0 0 0 4.7-4.7c1.1-.6 1.7-1.8 1.7-3s-.6-2.4-1.7-3A3.6 3.6 0 0 0 15 4.3c-.6-1.1-1.8-1.7-3-1.7Z"/></svg>
+        DATABASE SHIO
+      </button>
+    </nav>
+    <div class="pt-6 border-t border-slate-100 text-[10px] text-slate-400 text-center font-medium tracking-widest uppercase italic">Column Filter Active</div>
+  </aside>
+
+  <main class="flex-1 ml-72 p-10">
+    
+    <div id="section-ekor" class="section-fade">
+      <header class="mb-10">
+        <h1 class="text-3xl font-black text-slate-800 tracking-tight">📋 Ringkasan Ekor</h1>
+        <p class="text-slate-500 mt-1">Data Ekor Utama Berdasarkan Rumus</p>
+      </header>
+      <div class="max-w-5xl mx-auto space-y-4" id="ekor-container"></div>
+    </div>
+
+    <div id="section-shio" class="hidden section-fade">
+      <header class="mb-8 flex flex-col xl:flex-row xl:items-end justify-between gap-6">
+        <div>
+          <h1 class="text-4xl font-black text-slate-800 tracking-tight">🐉 Database Shio</h1>
+          <p class="text-slate-500 mt-2 italic">Gunakan pencarian untuk memfilter Shio atau angka spesifik</p>
+        </div>
+        <div class="relative group">
+          <input type="text" id="shio-search" onkeyup="filterShio()" placeholder="Cari Shio atau Angka (misal: 01)" class="pl-12 pr-6 py-4 w-full xl:w-96 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all shadow-sm bg-white font-bold text-blue-600">
+          <svg class="absolute left-4 top-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        </div>
+      </header>
+
+      <div id="shio-loading" class="flex flex-col items-center justify-center py-32 text-slate-400">
+        <div class="animate-spin mb-6 text-blue-600">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+        </div>
+        <p class="text-lg font-medium animate-pulse">Menghubungkan Database...</p>
+      </div>
+      
+      <div class="space-y-6" id="shio-container"></div>
+    </div>
+  </main>
+
+  <script>
+    // --- DATA EKOR ---
+    const dataEkor = {
+      0: { bom: "30*31*37*38*50*51*57*58*90*91*97*98", top: "20*21*27*28*60*61*67*68*40*41*47*48", cadangan: "32*36*34*52*56*54*92*96*94" },
+      1: { bom: "31*32*35*38*91*92*95*98*71*72*75*78", top: "01*02*05*08*41*42*45*48*61*62*65*68", cadangan: "30*34*36*90*94*96*70*74*76" },
+      2: { bom: "12*13*14*19*52*53*54*59*72*73*74*79", top: "02*03*04*09*62*63*64*69*82*83*84*89", cadangan: "10*16*18*50*56*58*70*76*78" },
+      3: { bom: "50*51*53*54*70*71*73*74*90*91*93*94", top: "20*21*23*24*80*81*83*84*60*61*63*64", cadangan: "52*58*56*72*78*76*92*98*96" },
+      4: { bom: "31*34*38*39*51*54*58*59*71*74*78*79", top: "01*04*08*09*21*24*28*29*61*64*68*69", cadangan: "30*32*36*50*52*56*70*72*76" },
+      5: { bom: "12*13*15*16*72*73*75*76*92*93*95*96", top: "42*43*45*46*02*03*05*06*82*83*85*86", cadangan: "14*10*18*74*70*78*94*90*98" },
+      6: { bom: "13*14*15*16*73*74*75*76*93*94*95*96", top: "43*44*45*46*03*04*05*06*83*84*85*86", cadangan: "14*10*18*74*70*78*94*90*98" },
+      7: { bom: "34*35*37*38*14*15*17*18*94*95*97*98", top: "24*25*27*28*04*05*07*08*64*65*67*68", cadangan: "32*30*36*12*10*16*92*90*96" },
+      8: { bom: "56*57*58*59*36*37*38*39*16*17*18*19", top: "06*07*08*09*26*27*28*29*46*47*48*49", cadangan: "50*52*54*30*32*34*10*12*14" },
+      9: { bom: "31*32*36*39*51*52*56*59*71*72*76*79", top: "01*02*06*09*41*42*46*49*81*82*86*89", cadangan: "30*34*38*50*54*58*70*74*78" }
+    };
+
+    const ekorContainer = document.getElementById("ekor-container");
+    Object.entries(dataEkor).forEach(([ekor, { bom, top, cadangan }]) => {
+      const block = document.createElement("div");
+      block.className = "bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm";
+      block.innerHTML = `<button onclick="toggle('ekor-${ekor}')" class="w-full px-6 py-5 text-left font-bold text-slate-700 flex justify-between items-center hover:bg-slate-50 transition-all">
+          <span class="flex items-center gap-3"><span class="bg-blue-600 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow-md">${ekor}</span> Ekor ${ekor}</span>
+          <svg id="icon-ekor-${ekor}" class="text-slate-400 transition-transform" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <div id="ekor-${ekor}" class="hidden px-6 pb-6 pt-2 animate-fadeIn"><div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-50 pt-4">
+            <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100"><span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">BOM</span><p class="text-emerald-900 font-mono font-bold mt-1 break-all">${bom}</p></div>
+            <div class="bg-amber-50 p-4 rounded-xl border border-amber-100"><span class="text-[10px] font-black text-amber-600 uppercase tracking-widest">TOP</span><p class="text-amber-900 font-mono font-bold mt-1 break-all">${top}</p></div>
+            <div class="bg-slate-50 p-4 rounded-xl border border-slate-200"><span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">CADANGAN</span><p class="text-slate-700 font-mono font-bold mt-1 break-all">${cadangan}</p></div>
+        </div></div>`;
+      ekorContainer.appendChild(block);
+    });
+
+    // --- LOGIKA SHIO ---
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=228702435&single=true&output=csv';
+    let listShio = [];
+    let headers = [];
+
+    async function fetchShioData() {
+      if (listShio.length > 0) return;
+      try {
+        const response = await fetch(csvUrl);
+        const csvText = await response.text();
+        // Bersihkan data dari karakter carriage return (\r)
+        const cleanText = csvText.replace(/\r/g, "");
+        const rows = cleanText.split('\n').filter(row => row.trim() !== "");
+        
+        headers = rows[0].split(',').map(h => h.replace(/"/g, '').trim());
+        const dataRows = rows.slice(1); 
+        
+        listShio = dataRows.map(row => {
+          // Parse CSV dengan memperhatikan koma di dalam tanda kutip
+          const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+          return cols.map(c => c.replace(/"/g, '').trim());
+        });
+        
+        renderShio(listShio);
+        document.getElementById('shio-loading').classList.add('hidden');
+      } catch (error) {
+        console.error("Fetch Error:", error);
+        document.getElementById('shio-loading').innerHTML = `<p class="text-red-500 font-bold">Error Memuat Data!</p>`;
+      }
+    }
+
+    function renderShio(data, searchTerm = "") {
+      const shioContainer = document.getElementById('shio-container');
+      shioContainer.innerHTML = '';
+
+      data.forEach(item => {
+        const shioName = item[0] || "Unknown";
+        const nameMatches = shioName.toLowerCase().includes(searchTerm);
+        
+        // Simpan data kolom N-AG (indeks 13 ke atas)
+        const filteredCols = [];
+        let hasMatchInCols = false;
+
+        for(let i = 13; i < headers.length; i++) {
+            if(headers[i] && i <= 32) {
+                const cellValue = item[i] || '-';
+                const isMatch = searchTerm && cellValue.toLowerCase().includes(searchTerm);
+                if(isMatch) hasMatchInCols = true;
+
+                filteredCols.push({
+                    label: headers[i],
+                    value: cellValue,
+                    isMatch: isMatch
+                });
+            }
+        }
+
+        // Filter: Tampilkan jika Shio cocok ATAU ada isi kolom yang cocok
+        if(searchTerm && !nameMatches && !hasMatchInCols) return;
+
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm card-hover transition-custom animate-fadeIn overflow-hidden";
+        
+        let titleDisplay = shioName;
+        if(searchTerm && nameMatches) {
+            const regex = new RegExp(`(${searchTerm})`, 'gi');
+            titleDisplay = titleDisplay.replace(regex, '<span class="bg-yellow-300 text-slate-900 px-1 rounded">$1</span>');
+        }
+
+        let htmlContent = `
+          <div class="bg-slate-800 p-5 flex justify-between items-center text-white">
+            <h3 class="text-2xl font-black tracking-tighter uppercase">${titleDisplay}</h3>
+            <span class="${searchTerm ? 'bg-amber-500' : 'bg-blue-600'} text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest italic transition-colors">
+                ${searchTerm ? 'Filtered Results' : 'Live Analysis'}
+            </span>
+          </div>
+          <div class="p-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">`;
+
+        filteredCols.forEach(col => {
+            let finalValue = col.value;
+            if(searchTerm && col.isMatch) {
+                const regex = new RegExp(`(${searchTerm})`, 'gi');
+                finalValue = finalValue.replace(regex, '<span class="highlight-match">$1</span>');
+            }
+
+            htmlContent += `
+            <div class="bg-slate-50 p-4 rounded-2xl border ${col.isMatch ? 'border-blue-200 ring-2 ring-blue-50' : 'border-slate-100'} flex flex-col transition-all">
+                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-2 border-b border-slate-200 pb-1">${col.label}</span>
+                <span class="text-sm font-black text-slate-700 break-all leading-relaxed">${finalValue}</span>
+            </div>`;
+        });
+
+        htmlContent += `</div></div>`;
+        card.innerHTML = htmlContent;
+        shioContainer.appendChild(card);
+      });
+    }
+
+    function filterShio() {
+      const query = document.getElementById('shio-search').value.trim().toLowerCase();
+      renderShio(listShio, query);
+    }
+
+    function toggle(id) {
+      const el = document.getElementById(id);
+      const icon = document.getElementById("icon-" + id);
+      el.classList.toggle("hidden");
+      if(icon) icon.style.transform = el.classList.contains("hidden") ? "rotate(0deg)" : "rotate(180deg)";
+    }
+
+    function showSection(section, btn) {
+      document.querySelectorAll('.section-fade').forEach(s => s.classList.add("hidden"));
+      document.getElementById(`section-${section}`).classList.remove("hidden");
+      document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove("active-menu"));
+      btn.classList.add("active-menu");
+      if (section === 'shio') fetchShioData();
+    }
+  </script>
+</body>
+</html>
