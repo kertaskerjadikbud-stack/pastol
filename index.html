@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>2D Premium Dashboard - Filtered Live Analysis</title>
+  <title>Dashboard Pastol - Filtered Live Analysis</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -17,7 +17,6 @@
     ::-webkit-scrollbar { width: 6px; }
     ::-webkit-scrollbar-track { background: #f1f1f1; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-    /* Warna sorotan lebih kontras untuk angka yang dicari */
     .highlight-match { background-color: #fef08a; color: #1e40af; padding: 2px 4px; border-radius: 4px; font-weight: 800; border: 1px dashed #eab308; }
   </style>
 </head>
@@ -28,7 +27,7 @@
       <div class="bg-blue-600 p-2 rounded-lg text-white shadow-lg shadow-blue-200">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
       </div>
-      <h2 class="text-xl font-extrabold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">Analisis 2D</h2>
+      <h2 class="text-xl font-extrabold bg-gradient-to-r from-blue-700 to-indigo-600 bg-clip-text text-transparent">ANALISA PASTOL</h2>
     </div>
     
     <nav class="space-y-2 flex-1">
@@ -38,10 +37,18 @@
       </button>
       <button onclick="showSection('shio', this)" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-semibold transition-custom text-left">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-1.2 0-2.4.6-3 1.7A3.6 3.6 0 0 0 4.3 9c-1.1.6-1.7 1.8-1.7 3s.6 2.4 1.7 3A3.6 3.6 0 0 0 9 19.3c.6 1.1 1.8 1.7 3 1.7s2.4-.6 3-1.7a3.6 3.6 0 0 0 4.7-4.7c1.1-.6 1.7-1.8 1.7-3s-.6-2.4-1.7-3A3.6 3.6 0 0 0 15 4.3c-.6-1.1-1.8-1.7-3-1.7Z"/></svg>
-        DATABASE SHIO
+        DATABASE 2D
+      </button>
+      <button onclick="showSection('shio-main', this)" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-semibold transition-custom text-left">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h7"/><path d="m9 12 2 2 4-4"/><circle cx="18" cy="18" r="3"/><path d="m21 21-1.6-1.6"/></svg>
+        SHIO MAIN
+      </button>
+      <button onclick="showSection('input-main', this)" class="menu-btn w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-600 font-semibold transition-custom text-left">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        INPUT ANGKA MAIN
       </button>
     </nav>
-    <div class="pt-6 border-t border-slate-100 text-[10px] text-slate-400 text-center font-medium tracking-widest uppercase italic">Column Filter Active</div>
+    <div class="pt-6 border-t border-slate-100 text-[10px] text-slate-400 text-center font-medium tracking-widest uppercase italic">PASUKAN GACOR</div>
   </aside>
 
   <main class="flex-1 ml-72 p-10">
@@ -57,24 +64,53 @@
     <div id="section-shio" class="hidden section-fade">
       <header class="mb-8 flex flex-col xl:flex-row xl:items-end justify-between gap-6">
         <div>
-          <h1 class="text-4xl font-black text-slate-800 tracking-tight">🐉 Database Shio</h1>
-          <p class="text-slate-500 mt-2 italic">Gunakan pencarian untuk memfilter Shio atau angka spesifik</p>
+          <h1 class="text-4xl font-black text-slate-800 tracking-tight">🐉 Database Angka 2D</h1>
+          <p class="text-slate-500 mt-2 italic">Filter database 2D All Pasaran</p>
         </div>
         <div class="relative group">
-          <input type="text" id="shio-search" onkeyup="filterShio()" placeholder="Cari Shio atau Angka (misal: 01)" class="pl-12 pr-6 py-4 w-full xl:w-96 rounded-2xl border-2 border-slate-100 focus:border-blue-500 focus:ring-4 focus:ring-blue-50 outline-none transition-all shadow-sm bg-white font-bold text-blue-600">
+          <input type="text" id="shio-search" onkeyup="filterShio()" placeholder="Cari..." class="pl-12 pr-6 py-4 w-full xl:w-96 rounded-2xl border-2 border-slate-100 focus:border-blue-500 outline-none shadow-sm font-bold text-blue-600">
           <svg class="absolute left-4 top-4 text-slate-400" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
         </div>
       </header>
-
       <div id="shio-loading" class="flex flex-col items-center justify-center py-32 text-slate-400">
-        <div class="animate-spin mb-6 text-blue-600">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
-        </div>
+        <div class="animate-spin mb-6 text-blue-600"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>
         <p class="text-lg font-medium animate-pulse">Menghubungkan Database...</p>
       </div>
-      
       <div class="space-y-6" id="shio-container"></div>
     </div>
+
+    <div id="section-shio-main" class="hidden section-fade">
+      <header class="mb-10">
+        <h1 class="text-4xl font-black text-slate-800 tracking-tight">📊 Prediksi Shio</h1>
+        <p class="text-slate-500 mt-1 italic">Data analisis shio main harian </p>
+      </header>
+      <div id="shio-main-loading" class="flex flex-col items-center justify-center py-32 text-slate-400">
+        <div class="animate-spin mb-6 text-indigo-600"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>
+        <p class="text-lg font-medium animate-pulse">Mengunduh Data CSV...</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-start" id="shio-main-container"></div>
+    </div>
+
+    <div id="section-input-main" class="hidden section-fade">
+      <header class="mb-8 flex flex-col xl:flex-row xl:items-end justify-between gap-6">
+        <div>
+          <h1 class="text-4xl font-black text-slate-800 tracking-tight">🎯 Input Angka Main</h1>
+          <p class="text-slate-500 mt-2 italic">Masukkan angka (Contoh: 24) untuk memfilter Kepala/Ekor secara otomatis</p>
+        </div>
+        <div class="relative">
+          <input type="text" id="angka-main-input" onkeyup="filterAngkaMain()" placeholder="Masukkan Angka Main..." maxlength="10" class="pl-12 pr-6 py-4 w-full xl:w-96 rounded-2xl border-2 border-indigo-100 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 outline-none transition-all shadow-sm bg-white font-black text-indigo-600 text-xl tracking-widest">
+          <svg class="absolute left-4 top-5 text-indigo-400" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m21 21-4.3-4.3"/><circle cx="11" cy="11" r="8"/></svg>
+        </div>
+      </header>
+
+      <div id="input-main-loading" class="flex flex-col items-center justify-center py-32 text-slate-400">
+        <div class="animate-spin mb-6 text-indigo-600"><svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></div>
+        <p class="text-lg font-medium animate-pulse">Sinkronisasi Kolom A, C, D...</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4" id="input-main-container"></div>
+    </div>
+
   </main>
 
   <script>
@@ -96,122 +132,119 @@
     Object.entries(dataEkor).forEach(([ekor, { bom, top, cadangan }]) => {
       const block = document.createElement("div");
       block.className = "bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm";
-      block.innerHTML = `<button onclick="toggle('ekor-${ekor}')" class="w-full px-6 py-5 text-left font-bold text-slate-700 flex justify-between items-center hover:bg-slate-50 transition-all">
+      block.innerHTML = `
+        <button onclick="toggle('ekor-${ekor}')" class="w-full px-6 py-5 text-left font-bold text-slate-700 flex justify-between items-center hover:bg-slate-50 transition-all">
           <span class="flex items-center gap-3"><span class="bg-blue-600 text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow-md">${ekor}</span> Ekor ${ekor}</span>
           <svg id="icon-ekor-${ekor}" class="text-slate-400 transition-transform" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
         </button>
-        <div id="ekor-${ekor}" class="hidden px-6 pb-6 pt-2 animate-fadeIn"><div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-50 pt-4">
+        <div id="ekor-${ekor}" class="hidden px-6 pb-6 pt-2 animate-fadeIn">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 border-t border-slate-50 pt-4">
             <div class="bg-emerald-50 p-4 rounded-xl border border-emerald-100"><span class="text-[10px] font-black text-emerald-600 uppercase tracking-widest">BOM</span><p class="text-emerald-900 font-mono font-bold mt-1 break-all">${bom}</p></div>
             <div class="bg-amber-50 p-4 rounded-xl border border-amber-100"><span class="text-[10px] font-black text-amber-600 uppercase tracking-widest">TOP</span><p class="text-amber-900 font-mono font-bold mt-1 break-all">${top}</p></div>
             <div class="bg-slate-50 p-4 rounded-xl border border-slate-200"><span class="text-[10px] font-black text-slate-500 uppercase tracking-widest">CADANGAN</span><p class="text-slate-700 font-mono font-bold mt-1 break-all">${cadangan}</p></div>
-        </div></div>`;
+          </div>
+        </div>`;
       ekorContainer.appendChild(block);
     });
 
-    // --- LOGIKA SHIO ---
-    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=228702435&single=true&output=csv';
-    let listShio = [];
-    let headers = [];
-
-    async function fetchShioData() {
-      if (listShio.length > 0) return;
-      try {
-        const response = await fetch(csvUrl);
-        const csvText = await response.text();
-        // Bersihkan data dari karakter carriage return (\r)
-        const cleanText = csvText.replace(/\r/g, "");
-        const rows = cleanText.split('\n').filter(row => row.trim() !== "");
-        
-        headers = rows[0].split(',').map(h => h.replace(/"/g, '').trim());
-        const dataRows = rows.slice(1); 
-        
-        listShio = dataRows.map(row => {
-          // Parse CSV dengan memperhatikan koma di dalam tanda kutip
-          const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
-          return cols.map(c => c.replace(/"/g, '').trim());
-        });
-        
-        renderShio(listShio);
-        document.getElementById('shio-loading').classList.add('hidden');
-      } catch (error) {
-        console.error("Fetch Error:", error);
-        document.getElementById('shio-loading').innerHTML = `<p class="text-red-500 font-bold">Error Memuat Data!</p>`;
-      }
+    // --- LOGIKA DATA CSV (SHARED) ---
+    async function fetchCSV(url) {
+      const response = await fetch(url);
+      const csvText = await response.text();
+      const cleanText = csvText.replace(/\r/g, "");
+      const rows = cleanText.split('\n').filter(row => row.trim() !== "");
+      const headers = rows[0].split(',').map(h => h.replace(/"/g, '').trim());
+      const data = rows.slice(1).map(row => {
+        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+        return cols.map(c => c.replace(/"/g, '').trim());
+      });
+      return { headers, data };
     }
 
-    function renderShio(data, searchTerm = "") {
-      const shioContainer = document.getElementById('shio-container');
-      shioContainer.innerHTML = '';
+    // Database Shio & Shio Main Logic (Existing)
+    let listShio = []; let headersShio = [];
+    async function fetchShioData() {
+      if (listShio.length > 0) return;
+      const res = await fetchCSV(csvShioUrl);
+      headersShio = res.headers; listShio = res.data;
+      renderShio(listShio);
+      document.getElementById('shio-loading').classList.add('hidden');
+    }
 
-      data.forEach(item => {
-        const shioName = item[0] || "Unknown";
-        const nameMatches = shioName.toLowerCase().includes(searchTerm);
-        
-        // Simpan data kolom N-AG (indeks 13 ke atas)
-        const filteredCols = [];
-        let hasMatchInCols = false;
+    // --- LOGIKA MENU INPUT ANGKA MAIN ---
+    const csvInputMainUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=1633987050&single=true&output=csv';
+    let listInputMain = [];
 
-        for(let i = 13; i < headers.length; i++) {
-            if(headers[i] && i <= 32) {
-                const cellValue = item[i] || '-';
-                const isMatch = searchTerm && cellValue.toLowerCase().includes(searchTerm);
-                if(isMatch) hasMatchInCols = true;
+    async function fetchInputMainData() {
+      if (listInputMain.length > 0) return;
+      try {
+        const res = await fetchCSV(csvInputMainUrl);
+        listInputMain = res.data;
+        renderInputMain(listInputMain);
+        document.getElementById('input-main-loading').classList.add('hidden');
+      } catch (e) { console.error(e); }
+    }
 
-                filteredCols.push({
-                    label: headers[i],
-                    value: cellValue,
-                    isMatch: isMatch
-                });
-            }
-        }
+    function renderInputMain(data, mainDigits = []) {
+      const container = document.getElementById('input-main-container');
+      container.innerHTML = '';
+      
+      // Filter Logic: Patokan Kolom C (Indeks 2)
+      // Jika diinput '24', maka digit '2' atau '4' harus ada di Kolom C
+      const filtered = data.filter(row => {
+        if (mainDigits.length === 0) return true; // Tampilkan semua jika kosong
+        const colC = row[2] || "";
+        return mainDigits.some(digit => colC.includes(digit));
+      });
 
-        // Filter: Tampilkan jika Shio cocok ATAU ada isi kolom yang cocok
-        if(searchTerm && !nameMatches && !hasMatchInCols) return;
+      if (filtered.length === 0) {
+        container.innerHTML = `<div class="col-span-full py-20 text-center text-slate-400 font-bold">Tidak ada data yang cocok dengan Angka Main tersebut.</div>`;
+        return;
+      }
 
+      filtered.forEach(row => {
+        // Kolom D (Indeks 3), C (Indeks 2), A (Indeks 0)
         const card = document.createElement('div');
-        card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm card-hover transition-custom animate-fadeIn overflow-hidden";
-        
-        let titleDisplay = shioName;
-        if(searchTerm && nameMatches) {
-            const regex = new RegExp(`(${searchTerm})`, 'gi');
-            titleDisplay = titleDisplay.replace(regex, '<span class="bg-yellow-300 text-slate-900 px-1 rounded">$1</span>');
-        }
-
-        let htmlContent = `
-          <div class="bg-slate-800 p-5 flex justify-between items-center text-white">
-            <h3 class="text-2xl font-black tracking-tighter uppercase">${titleDisplay}</h3>
-            <span class="${searchTerm ? 'bg-amber-500' : 'bg-blue-600'} text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest italic transition-colors">
-                ${searchTerm ? 'Filtered Results' : 'Live Analysis'}
-            </span>
+        card.className = "bg-white border border-slate-200 rounded-2xl p-5 shadow-sm animate-fadeIn card-hover";
+        card.innerHTML = `
+          <div class="flex flex-col gap-3">
+            <div class="border-b pb-2">
+              <span class="text-[9px] font-bold text-slate-400 uppercase block tracking-widest">RESULT / DATA</span>
+              <span class="text-lg font-black text-blue-600">${row[3] || '-'}</span>
+            </div>
+            <div class="bg-indigo-50 p-3 rounded-xl border border-indigo-100">
+              <span class="text-[9px] font-bold text-indigo-400 uppercase block tracking-widest">KAPALA/EKOR (C)</span>
+              <span class="text-xl font-black text-indigo-700 tracking-tighter">
+                ${highlightDigits(row[2] || '-', mainDigits)}
+              </span>
+            </div>
+            <div>
+              <span class="text-[9px] font-bold text-slate-400 uppercase block tracking-widest">KETERANGAN (A)</span>
+              <span class="text-sm font-medium text-slate-600">${row[0] || '-'}</span>
+            </div>
           </div>
-          <div class="p-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">`;
-
-        filteredCols.forEach(col => {
-            let finalValue = col.value;
-            if(searchTerm && col.isMatch) {
-                const regex = new RegExp(`(${searchTerm})`, 'gi');
-                finalValue = finalValue.replace(regex, '<span class="highlight-match">$1</span>');
-            }
-
-            htmlContent += `
-            <div class="bg-slate-50 p-4 rounded-2xl border ${col.isMatch ? 'border-blue-200 ring-2 ring-blue-50' : 'border-slate-100'} flex flex-col transition-all">
-                <span class="text-[10px] font-bold text-slate-400 uppercase tracking-tighter mb-2 border-b border-slate-200 pb-1">${col.label}</span>
-                <span class="text-sm font-black text-slate-700 break-all leading-relaxed">${finalValue}</span>
-            </div>`;
-        });
-
-        htmlContent += `</div></div>`;
-        card.innerHTML = htmlContent;
-        shioContainer.appendChild(card);
+        `;
+        container.appendChild(card);
       });
     }
 
-    function filterShio() {
-      const query = document.getElementById('shio-search').value.trim().toLowerCase();
-      renderShio(listShio, query);
+    function highlightDigits(text, digits) {
+      if (!digits.length) return text;
+      let result = text;
+      digits.forEach(d => {
+        const regex = new RegExp(d, "g");
+        result = result.replace(regex, `<span class="text-red-600 underline">${d}</span>`);
+      });
+      return result;
     }
 
+    function filterAngkaMain() {
+      const val = document.getElementById('angka-main-input').value.trim();
+      const digits = val.split('').filter(d => !isNaN(d) && d !== ' ');
+      renderInputMain(listInputMain, digits);
+    }
+
+    // --- NAVIGASI DASAR ---
     function toggle(id) {
       const el = document.getElementById(id);
       const icon = document.getElementById("icon-" + id);
@@ -221,10 +254,66 @@
 
     function showSection(section, btn) {
       document.querySelectorAll('.section-fade').forEach(s => s.classList.add("hidden"));
-      document.getElementById(`section-${section}`).classList.remove("hidden");
+      const target = document.getElementById(`section-${section}`);
+      if(target) target.classList.remove("hidden");
+      
       document.querySelectorAll('.menu-btn').forEach(b => b.classList.remove("active-menu"));
       btn.classList.add("active-menu");
+      
       if (section === 'shio') fetchShioData();
+      if (section === 'shio-main') fetchShioMainData();
+      if (section === 'input-main') fetchInputMainData();
+    }
+
+    // Existing Logic (Database Shio & Shio Main)
+    const csvShioUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=228702435&single=true&output=csv';
+    const csvShioMainUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-Dps1Dr_5bQF6CrOrfyosufqVTRcwbJQhb7BOt_FrYnGvTDGwQaPm9AcyLSjwoGCn77rMDmI_efaG/pub?gid=12164954&single=true&output=csv';
+    
+    // ... (Keep existing fetchShioMainData and render logic from previous code) ...
+    async function fetchShioMainData() {
+      if (headersShioMain.length > 0) return;
+      const res = await fetchCSV(csvShioMainUrl);
+      headersShioMain = res.headers; listShioMain = res.data;
+      renderShioMain(listShioMain);
+      document.getElementById('shio-main-loading').classList.add('hidden');
+    }
+    let headersShioMain = []; let listShioMain = [];
+    function renderShioMain(data) {
+      const container = document.getElementById('shio-main-container');
+      container.innerHTML = '';
+      data.forEach(item => {
+        const card = document.createElement('div');
+        card.className = "bg-white border border-slate-200 rounded-3xl p-6 shadow-sm card-hover transition-custom animate-fadeIn h-fit";
+        let contents = '';
+        for(let i = 0; i < headersShioMain.length; i++) {
+          const headerName = headersShioMain[i];
+          if(headerName) {
+            const isSpecialRow = headerName.toUpperCase().includes("2D BOM") || headerName.toUpperCase().includes("2D TOP");
+            contents += `<div class="flex ${isSpecialRow ? 'flex-col' : 'flex-col sm:flex-row sm:justify-between sm:items-start'} py-3 border-b border-slate-50 gap-2">
+                <span class="text-[10px] font-bold ${isSpecialRow ? 'text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md w-fit' : 'text-slate-400'} uppercase tracking-tight shrink-0">${headerName}</span>
+                <span class="text-sm font-extrabold text-indigo-700 break-words leading-relaxed ${!isSpecialRow ? 'sm:text-right' : 'bg-slate-50 p-2 rounded-xl border border-dashed border-slate-200'}">${item[i] || '-'}</span>
+              </div>`;
+          }
+        }
+        card.innerHTML = `<div class="space-y-1">${contents}</div>`;
+        container.appendChild(card);
+      });
+    }
+    function renderShio(data, searchTerm = "") {
+      const shioContainer = document.getElementById('shio-container');
+      shioContainer.innerHTML = '';
+      data.forEach(item => {
+        const shioName = item[0] || "Unknown";
+        const filteredCols = [];
+        for(let i = 13; i < headersShio.length; i++) { if(headersShio[i] && i <= 32) filteredCols.push({ label: headersShio[i], value: item[i] || '-' }); }
+        const card = document.createElement('div');
+        card.className = "bg-white rounded-3xl border border-slate-200 shadow-sm card-hover transition-custom animate-fadeIn overflow-hidden";
+        card.innerHTML = `<div class="bg-slate-800 p-5 flex justify-between items-center text-white"><h3 class="text-2xl font-black uppercase tracking-tight">${shioName}</h3></div>
+          <div class="p-6"><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            ${filteredCols.map(col => `<div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex flex-col"><span class="text-[10px] font-bold text-slate-400 uppercase mb-2 border-b pb-1">${col.label}</span><span class="text-sm font-black text-slate-700 break-all leading-relaxed">${col.value}</span></div>`).join('')}
+          </div></div>`;
+        shioContainer.appendChild(card);
+      });
     }
   </script>
 </body>
